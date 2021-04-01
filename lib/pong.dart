@@ -40,7 +40,7 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
       end: 100,
     ).animate(controller);
     animation.addListener(() {
-      setState(() {
+      safeSetState(() {
         (hDir == Direction.right) ? posX += increment : posX -= increment;
         (vDir == Direction.down) ? posY += increment : posY -= increment;
       });
@@ -57,14 +57,21 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
   }
 
   void checkBorders() {
+    double diameter = 50;
     if (posX <= 0 && hDir == Direction.left) {
       hDir = Direction.right;
     }
-    if (posX >= width - 50 && hDir == Direction.right) {
+    if (posX >= width - diameter && hDir == Direction.right) {
       hDir = Direction.left;
     }
-    if (posY >= height - 50 && vDir == Direction.down) {
-      vDir = Direction.up;
+    if (posY >= height - diameter - batheight && vDir == Direction.down) {
+      if (posX >= (batPosition - diameter) &&
+          posX <= (batPosition + diameter)) {
+        vDir = Direction.up;
+      } else {
+        controller.stop();
+        dispose();
+      }
     }
     if (posY <= 0 && vDir == Direction.up) {
       vDir = Direction.down;
@@ -73,9 +80,17 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
 
   void moveBat(DragUpdateDetails update) {
     print("updating ${update.delta.dx}");
-    setState(() {
+    safeSetState(() {
       batPosition += update.delta.dx;
     });
+  }
+
+  void safeSetState(Function function) {
+    if (mounted && controller.isAnimating) {
+      setState(() {
+        function();
+      });
+    }
   }
 
   @override
