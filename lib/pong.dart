@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pong_game/ball.dart';
 import 'package:pong_game/bat.dart';
+import 'dart:math';
 
 enum Direction { up, down, left, right }
 
@@ -26,6 +27,9 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
 
   double increment = 5;
 
+  double randX = 1;
+  double randY = 1;
+
   @override
   void initState() {
     posX = 0;
@@ -41,8 +45,12 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
     ).animate(controller);
     animation.addListener(() {
       safeSetState(() {
-        (hDir == Direction.right) ? posX += increment : posX -= increment;
-        (vDir == Direction.down) ? posY += increment : posY -= increment;
+        (hDir == Direction.right)
+            ? posX += ((increment * randX).round())
+            : posX -= ((increment * randX).round());
+        (vDir == Direction.down)
+            ? posY += ((increment * randY).round())
+            : posY -= ((increment * randY).round());
       });
       checkBorders();
     });
@@ -60,14 +68,17 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
     double diameter = 50;
     if (posX <= 0 && hDir == Direction.left) {
       hDir = Direction.right;
+      randX = randomNumber();
     }
     if (posX >= width - diameter && hDir == Direction.right) {
       hDir = Direction.left;
+      randX = randomNumber();
     }
     if (posY >= height - diameter - batheight && vDir == Direction.down) {
       if (posX >= (batPosition - diameter) &&
           posX <= (batPosition + diameter)) {
         vDir = Direction.up;
+        randY = randomNumber();
       } else {
         controller.stop();
         dispose();
@@ -75,6 +86,7 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
     }
     if (posY <= 0 && vDir == Direction.up) {
       vDir = Direction.down;
+      randY = randomNumber();
     }
   }
 
@@ -93,13 +105,19 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
     }
   }
 
+  double randomNumber() {
+    var ran = new Random();
+    int myNum = ran.nextInt(101);
+    return (50 + myNum) / 100;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         height = constraints.maxHeight;
         width = constraints.maxWidth;
-        batWidth = width / 5;
+        batWidth = width / 3;
         batheight = height / 20;
         return Stack(
           children: <Widget>[
