@@ -30,6 +30,8 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
   double randX = 1;
   double randY = 1;
 
+  int score = 0;
+
   @override
   void initState() {
     posX = 0;
@@ -79,6 +81,9 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
           posX <= (batPosition + diameter)) {
         vDir = Direction.up;
         randY = randomNumber();
+        safeSetState(() {
+          score++;
+        });
       } else {
         controller.stop();
         dispose();
@@ -121,6 +126,11 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
         batheight = height / 20;
         return Stack(
           children: <Widget>[
+            Positioned(
+              top: 0,
+              right: 24,
+              child: Text("Score " + score.toString()),
+            ),
             Positioned(
               child: Ball(),
               top: posY,
